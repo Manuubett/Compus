@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opportunities — Life After Campus</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  body { font-family:"Poppins",sans-serif; background:#f9fafe; margin:0; padding:0; }
+  header { background:#0066ff; color:white; text-align:center; padding:20px; }
+  .container { max-width:800px; margin:20px auto; padding:10px; }
+  .search-bar input, select { width:48%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; }
+  .card { background:#fff; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:15px; }
+  .card h3 { margin:0; color:#0066ff; }
+  .markdown-body { margin:10px 0; line-height:1.6; }
+  .markdown-body h1,h2,h3 { color:#222; margin:1em 0 0.5em; }
+  .markdown-body ul { padding-left:20px; }
+  .markdown-body blockquote { border-left:4px solid #0066ff; padding-left:15px; color:#555; font-style:italic; }
+  .card img { width:100%; max-height:200px; object-fit:cover; border-radius:10px; margin-top:10px; }
+  .tags { margin-top:10px; }
+  .tag { display:inline-block; background:#e0ecff; color:#0056d6; padding:5px 10px; border-radius:20px; margin-right:5px; font-size:12px; }
+  .support-links { margin-top:10px; }
+  .support-links a { display:inline-block; margin-right:8px; background:#fafafa; padding:6px 10px; border-radius:6px; border:1px solid #ddd; font-size:13px; text-decoration:none; color:#0066ff; }
+  button { background:#0066ff; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  .filters { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Career & Growth Opportunities</h1>
+  <p>Explore internships, jobs, and collaborations from real people</p>
+</header>
+<div class="container">
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Search by title, description, or tags...">
+    <select id="filterType">
+      <option value="">All Types</option>
+      <option>Job</option>
+      <option>Internship</option>
+      <option>Freelance</option>
+      <option>Scholarship</option>
+      <option>Startup</option>
+    </select>
+  </div>
+  <div id="opportunityList"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC23iQpw8dvOamO5FpcrWWlgTwJ8gvmuM4",
+  authDomain: "reconnect-10733.firebaseapp.com",
+  projectId: "reconnect-10733",
+  storageBucket: "reconnect-10733.firebasestorage.app",
+  messagingSenderId: "902709752297",
+  appId: "1:902709752297:web:b89e694688d25472ac1b78"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+marked.setOptions({ breaks: true, gfm: true });
+
+let opportunities = [];
+
+async function loadOpportunities() {
+  const snapshot = await db.collection("opportunities").orderBy("timestamp","desc").get();
+  opportunities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  renderOpportunities();
+}
+
+function renderOpportunities() {
+  const container = document.getElementById("opportunityList");
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const filterType = document.getElementById("filterType").value;
+
+  container.innerHTML = "";
+
+  opportunities
+    .filter(o => {
+      // Filter by type
+      if (filterType && o.type !== filterType) return false;
+      // Filter by search query (title, description, tags)
+      if (!search) return true;
+      const inTitle = o.title && o.title.toLowerCase().includes(search);
+      const inDesc = o.description && o.description.toLowerCase().includes(search);
+      const inTags = o.tags && o.tags.some(t => t.toLowerCase().includes(search));
+      return inTitle || inDesc || inTags;
+    })
+    .forEach(o => {
+      const tagsHTML = o.tags && o.tags.length
+        ? `<div class='tags'>${o.tags.map(t => `<span class='tag'>${t}</span>`).join('')}</div>`
+        : '';
+
+      const supportLinksHTML = o.supportLinks && o.supportLinks.length
+        ? `<div class='support-links'>${o.supportLinks.map(l => `<a href='${l.url}' target='_blank'>${l.label}</a>`).join('')}</div>`
+        : '';
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${o.title}</h3>
+        <p><strong>Type:</strong> ${o.type || "N/A"} | <strong>Posted by:</strong> ${o.postedByName || "Anonymous"}</p>
+        <div class="markdown-body">${marked.parse(o.description || "")}</div>
+        ${o.imageUrl ? `<img src="${o.imageUrl}" alt="">` : ""}
+        ${tagsHTML}
+        <a href="${o.link}" target="_blank"><button>Apply / Learn More</button></a>
+        ${supportLinksHTML}
+      `;
+      container.appendChild(card);
+    });
+}
+
+// Search & filter listeners
+document.getElementById("searchInput").addEventListener("input", renderOpportunities);
+document.getElementById("filterType").addEventListener("change", renderOpportunities);
+
+loadOpportunities();
+</script>
+</body>
+</html>

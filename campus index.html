@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+   <title>Life After Campus — Real Stories. Real Lessons.</title>
+  <meta name="description" content="Life After Campus — a community where graduates, students, and mentors share real-life experiences, career journeys, and lessons beyond the classroom.">
+
+  <!-- ==== Additional SEO & Social Meta Tags ==== -->
+  <meta name="keywords" content="life after campus, graduate stories, career advice, university alumni, student mentorship, real life lessons, post-graduation experiences">
+  <meta name="author" content="Life After Campus Team">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#004aad">
+
+  <!-- Open Graph / Facebook / Social Sharing -->
+  <meta property="og:title" content="Life After Campus — Real Stories. Real Lessons.">
+  <meta property="og:description" content="Connect with graduates, students, and mentors sharing true stories about careers, business, and life beyond graduation.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80">
+  <meta property="og:url" content="https://yourdomain.com"> <!-- Replace with your actual domain -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Life After Campus">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Life After Campus — Real Stories. Real Lessons.">
+  <meta name="twitter:description" content="Connect with graduates, students, and mentors sharing true stories about careers, business, and life beyond graduation.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80">
+  <meta name="twitter:site" content="@yourtwitterhandle"> <!-- Optional: replace with your handle -->
+
+  <!-- Favicon (add your own favicon files if you have them) -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <style>
+    * {margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif;}
+    body {background:#f8fafc; color:#333;}
+    header {background:#004aad; color:#fff; padding:20px; text-align:center;}
+    nav {background:#003580; display:flex; justify-content:center; gap:25px; padding:10px 0;}
+    nav a {color:#fff; text-decoration:none; font-weight:500;}
+    nav a:hover {color:#ffcc00;}
+    .hero {background:url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=60') center/cover no-repeat; color:#fff; text-align:center; padding:100px 20px;}
+    .hero h2 {font-size:2rem; margin-bottom:15px; text-shadow:0 2px 6px rgba(0,0,0,0.4);}
+    .hero button {background:#ffcc00; border:none; color:#003580; padding:12px 25px; border-radius:30px; cursor:pointer; font-weight:600;}
+    .hero button:hover {background:#ffd84d;}
+    section {padding:60px 20px; text-align:center;}
+    h3 {font-size:1.6rem; color:#004aad; margin-bottom:20px;}
+    .search-box {max-width:400px; margin:0 auto 25px; display:flex; border:1px solid #ccc; border-radius:30px; overflow:hidden;}
+    .search-box input {flex:1; padding:10px 15px; border:none; outline:none;}
+    .search-box button {background:#004aad; color:#fff; border:none; padding:10px 20px; cursor:pointer;}
+    .cards {display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:20px; max-width:1100px; margin:0 auto;}
+    .card {background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); overflow:hidden; transition:0.3s;}
+    .card:hover {transform:translateY(-5px);}
+    .card img.post-img {width:100%; height:200px; object-fit:cover;}
+    .card-content {padding:20px; text-align:left;}
+    .user-info {display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+    .user-info img {width:40px; height:40px; border-radius:50%; object-fit:cover;}
+    .user-info span {font-weight:600; color:#003580;}
+    .card-content h4 {color:#003580; margin-bottom:8px;}
+    .card-content p {color:#555; font-size:0.95rem;}
+    .meta {display:flex; justify-content:space-between; font-size:0.85rem; margin-top:8px; color:#777;}
+    footer {background:#003580; color:#fff; text-align:center; padding:20px; font-size:0.9rem;}
+    @media(max-width:600px){.hero h2{font-size:1.5rem;}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Life After Campus</h1>
+    <p id="welcome"></p>
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+
+    <a href="login5.html">Community</a>
+    <a href="login5.html">Join</a>
+  </nav>
+
+  <section class="hero">
+    <h2>Discover What Life After Campus Really Looks Like</h2>
+    <p>Connect with graduates, students, and mentors sharing true stories about careers, business, and life beyond graduation.</p>
+    <button onclick="location.href='login5.html'">Join the Community</button>
+  </section>
+
+  <section>
+    <h3>Explore Stories</h3>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by name, campus, or story..." />
+      <button onclick="searchPosts()">Search</button>
+    </div>
+
+    <h3>🔥 Popular Posts</h3>
+    <div id="popularPosts" class="cards"></div>
+
+    <h3>🕓 Recent Posts</h3>
+    <div id="recentPosts" class="cards"></div>
+  </section>
+
+  <footer>© 2025 Life After Campus • Built to Inspire and Connect</footer>
+
+  <!-- Firebase + JS -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC23iQpw8dvOamO5FpcrWWlgTwJ8gvmuM4",
+    authDomain: "reconnect-10733.firebaseapp.com",
+    projectId: "reconnect-10733",
+    storageBucket: "reconnect-10733.firebasestorage.app",
+    messagingSenderId: "902709752297",
+    appId: "1:902709752297:web:b89e694688d25472ac1b78"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth();
+
+  const popularPostsContainer = document.getElementById('popularPosts');
+  const recentPostsContainer = document.getElementById('recentPosts');
+  const searchInput = document.getElementById('searchInput');
+  const welcome = document.getElementById('welcome');
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) welcome.textContent = `Welcome, ${user.displayName || "Friend"} 👋`;
+    else welcome.textContent = "Welcome Guest 👋";
+  });
+
+  async function getUserData(userId) {
+    if (!userId) return null;
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists() ? userSnap.data() : null;
+  }
+
+  async function fetchPopularPosts() {
+    const q = query(collection(db, "posts"), orderBy("likesCount", "desc"), limit(6));
+    const snap = await getDocs(q);
+    popularPostsContainer.innerHTML = "";
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const user = await getUserData(data.userId);
+      renderPostCard(popularPostsContainer, data, user);
+    }
+  }
+
+  async function fetchRecentPosts() {
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(6));
+    const snap = await getDocs(q);
+    recentPostsContainer.innerHTML = "";
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const user = await getUserData(data.userId);
+      renderPostCard(recentPostsContainer, data, user);
+    }
+  }
+
+  function renderPostCard(container, post, user) {
+    const displayName = user?.name || "Unknown User";
+    const profilePic = user?.photoUrl || "https://via.placeholder.com/40";
+    const campus = user?.campus || "";
+    const likes = post.likesCount ?? (post.likes?.length ?? 0);
+    const comments = post.commentsCount ?? (post.comments?.length ?? 0);
+    const title = post.title || post.text?.slice(0, 40) || "Untitled Story";
+    const textSnippet = post.text ? (post.text.length > 120 ? post.text.substring(0, 120) + "…" : post.text) : "";
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img loading="lazy" class="post-img" src="${post.imageUrl || 'https://via.placeholder.com/400x200'}" alt="Post image">
+      <div class="card-content">
+        <div class="user-info">
+          <img src="${profilePic}" alt="${displayName}'s profile picture" />
+          <span>${displayName} <small style="color:#666;">(${campus})</small></span>
+        </div>
+        <h4>${title}</h4>
+        <p>${textSnippet}</p>
+        <div class="meta">
+          <span>❤️ ${likes}</span>
+          <span>💬 ${comments}</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  }
+
+  // searchPosts: searches posts by text or author/campus name
+  async function searchPosts() {
+    const qVal = (searchInput.value || "").trim().toLowerCase();
+    if (!qVal) {
+      // reset view when search is empty
+      await fetchPopularPosts();
+      await fetchRecentPosts();
+      return;
+    }
+
+    popularPostsContainer.innerHTML = "<p>Searching...</p>";
+    recentPostsContainer.innerHTML = "";
+
+    const snap = await getDocs(collection(db, "posts"));
+    const matches = [];
+
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const user = await getUserData(data.userId);
+      const textMatch = data.text && data.text.toLowerCase().includes(qVal);
+      const nameMatch = user?.name && user.name.toLowerCase().includes(qVal);
+      const campusMatch = user?.campus && user.campus.toLowerCase().includes(qVal);
+
+      if (textMatch || nameMatch || campusMatch) matches.push({ data, user });
+    }
+
+    popularPostsContainer.innerHTML = "";
+    // render matched items into the popular area for visibility
+    matches.forEach(m => renderPostCard(popularPostsContainer, m.data, m.user));
+  }
+
+  // expose to global scope so older inline handlers still work
+  window.searchPosts = searchPosts;
+
+  // prefer wiring the input with addEventListener (safer)
+  searchInput.addEventListener('input', () => {
+    // small debounce to avoid hammering Firestore on fast typing
+    if (window._searchTimeout) clearTimeout(window._searchTimeout);
+    window._searchTimeout = setTimeout(searchPosts, 300);
+  });
+
+  // initial load
+  fetchPopularPosts();
+  fetchRecentPosts();
+</script>
+</body>
+</html>

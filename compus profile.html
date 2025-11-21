@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Your Profile — FollowUp Connect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --blue: #0066ff;
+      --light-blue: #eef2ff;
+      --gray: #666;
+      --bg: #f8faff;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 34px;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      position: relative;
+    }
+    .logout {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: var(--gray);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+    }
+    .logout:hover { color: #e74c3c; }
+    h2 {
+      color: var(--blue);
+      margin: 0 0 8px 0;
+      font-size: 1.6rem;
+    }
+    .subtitle {
+      color: var(--gray);
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+    .photo-section {
+      margin-bottom: 20px;
+    }
+    #preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--light-blue);
+      box-shadow: 0 4px 12px rgba(0,102,255,0.15);
+    }
+    input[type="file"] {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      margin: 10px 0;
+      border: 1.5px solid #ddd;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(0,102,255,0.1);
+    }
+    .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      width: 100%;
+      font-weight: 600;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    .btn:hover { background: #0052cc; transform: translateY(-1px); }
+    .btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .skip {
+      margin-top: 12px;
+      color: var(--gray);
+      font-size: 0.94rem;
+      text-decoration: none;
+    }
+    .skip:hover { color: var(--blue); text-decoration: underline; }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="container">
+    <button class="logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+
+    <h2>Complete Your Profile</h2>
+    <p class="subtitle">Help us connect you with the right alumni & mentors</p>
+
+    <div class="photo-section">
+      <img id="preview" src="https://via.placeholder.com/100/0066ff/ffffff?text=👤" alt="Profile Photo">
+      <br>
+      <input type="file" id="photo" accept="image/*" />
+    </div>
+
+    <input type="text" id="name" placeholder="Full Name" required />
+
+    <input list="universities" id="campus" placeholder="Your Campus (e.g., Harvard University)" required />
+    <datalist id="universities"></datalist>
+
+    <select id="status" required>
+      <option value="" disabled selected>Current Status</option>
+      <option>Undergraduate</option>
+      <option>Graduate</option>
+      <option>Alumni</option>
+      <option>Faculty/Staff</option>
+      <option>Other</option>
+    </select>
+
+    <input type="number" id="gradYear" placeholder="Expected/Actual Graduation Year" min="1950" max="2035" />
+
+    <input type="text" id="course" placeholder="Course/Major (e.g., Computer Science)" />
+
+    <input type="text" id="workStatus" placeholder="Current Role (e.g., Software Engineer, Student, Founder)" />
+
+    <button class="btn" id="saveBtn">Save & Continue →</button>
+    <a href="home.html" class="skip">Skip for now →</a>
+  </div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC23iQpw8dvOamO5FpcrWWlgTwJ8gvmuM4",
+    authDomain: "reconnect-10733.firebaseapp.com",
+    projectId: "reconnect-10733",
+    storageBucket: "reconnect-10733.firebasestorage.app",
+    messagingSenderId: "902709752297",
+    appId: "1:902709752297:web:b89e694688d25472ac1b78"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let selectedFile = null;
+
+  // Load universities
+  fetch('https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json')
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('universities');
+      data.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.name;
+        list.appendChild(opt);
+      });
+    })
+    .catch(() => console.log("University list failed to load"));
+
+  // Photo preview
+  document.getElementById('photo').addEventListener('change', e => {
+    selectedFile = e.target.files[0];
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onload = () => document.getElementById('preview').src = reader.result;
+      reader.readAsDataURL(selectedFile);
+    }
+  });
+
+  // Upload to ImgBB
+  async function uploadPhoto(file) {
+    const form = new FormData();
+    form.append('image', file);
+    const res = await fetch('https://api.imgbb.com/1/upload?key=05163a0dd1a27a6334b22abb1d279bec', {
+      method: 'POST',
+      body: form
+    });
+    const json = await res.json();
+    return json.data.url;
+  }
+
+  // Pre-fill existing data
+  auth.onAuthStateChanged(async user => {
+    if (!user) return location.href = "login5.html";
+
+    const doc = await db.collection("users").doc(user.uid).get();
+    if (doc.exists) {
+      const data = doc.data();
+      if (data.name) document.getElementById("name").value = data.name;
+      if (data.campus) document.getElementById("campus").value = data.campus;
+      if (data.status) document.getElementById("status").value = data.status;
+      if (data.gradYear) document.getElementById("gradYear").value = data.gradYear;
+      if (data.course) document.getElementById("course").value = data.course;
+      if (data.workStatus) document.getElementById("workStatus").value = data.workStatus;
+      if (data.photoUrl) document.getElementById("preview").src = data.photoUrl;
+    } else {
+      document.getElementById("name").value = user.displayName || "";
+    }
+  });
+
+  // Save profile
+  document.getElementById("saveBtn").onclick = async () => {
+    const name = document.getElementById("name").value.trim();
+    const campus = document.getElementById("campus").value.trim();
+    const status = document.getElementById("status").value;
+    const gradYear = document.getElementById("gradYear").value;
+    const course = document.getElementById("course").value.trim();
+    const workStatus = document.getElementById("workStatus").value.trim();
+
+    if (!name || !campus || !status) {
+      return alert("Please fill at least name, campus, and status.");
+    }
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const container = document.getElementById("container");
+    const saveBtn = document.getElementById("saveBtn");
+    container.classList.add("loading");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
+    let photoUrl = "";
+    if (selectedFile) {
+      try {
+        photoUrl = await uploadPhoto(selectedFile);
+      } catch (e) {
+        console.error("Photo upload failed", e);
+        if (!confirm("Photo upload failed. Continue without photo?")) {
+          container.classList.remove("loading");
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Save & Continue →";
+          return;
+        }
+      }
+    }
+
+    try {
+      await db.collection("users").doc(user.uid).set({
+        name,
+        email: user.email,
+        campus,
+        status,
+        gradYear: gradYear ? parseInt(gradYear) : null,
+        course,
+        workStatus,
+        photoUrl: photoUrl || user.photoURL || "",
+        hasCompletedProfile: true,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      alert("✅ Profile completed successfully!");
+      window.location.href = "home.html";
+    } catch (err) {
+      alert("Error saving profile. Please try again.");
+      console.error(err);
+      container.classList.remove("loading");
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save & Continue →";
+    }
+  };
+
+  // Logout - now attached properly with event listener (more reliable)
+  document.querySelector(".logout").addEventListener("click", () => {
+    if (confirm("Are you sure you want to log out?")) {
+      auth.signOut().then(() => {
+        window.location.href = "login5.html";
+      });
+    }
+  });
+</script>
+</body>
+</html>
