@@ -68,7 +68,6 @@ async function loadOpportunities() {
   opportunities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   renderOpportunities();
 }
-
 function renderOpportunities() {
   const container = document.getElementById("opportunityList");
   const search = document.getElementById("searchInput").value.toLowerCase();
@@ -78,9 +77,7 @@ function renderOpportunities() {
 
   opportunities
     .filter(o => {
-      // Filter by type
       if (filterType && o.type !== filterType) return false;
-      // Filter by search query (title, description, tags)
       if (!search) return true;
       const inTitle = o.title && o.title.toLowerCase().includes(search);
       const inDesc = o.description && o.description.toLowerCase().includes(search);
@@ -96,6 +93,11 @@ function renderOpportunities() {
         ? `<div class='support-links'>${o.supportLinks.map(l => `<a href='${l.url}' target='_blank'>${l.label}</a>`).join('')}</div>`
         : '';
 
+      // Only render the apply button if link exists
+      const applyButtonHTML = o.link
+        ? `<a href="${o.link}" target="_blank"><button>Apply / Learn More</button></a>`
+        : `<button disabled style="opacity:0.5; cursor:not-allowed;">Apply / Learn More</button>`;
+
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
@@ -104,12 +106,13 @@ function renderOpportunities() {
         <div class="markdown-body">${marked.parse(o.description || "")}</div>
         ${o.imageUrl ? `<img src="${o.imageUrl}" alt="">` : ""}
         ${tagsHTML}
-        <a href="${o.link}" target="_blank"><button>Apply / Learn More</button></a>
+        ${applyButtonHTML}
         ${supportLinksHTML}
       `;
       container.appendChild(card);
     });
 }
+
 
 // Search & filter listeners
 document.getElementById("searchInput").addEventListener("input", renderOpportunities);
