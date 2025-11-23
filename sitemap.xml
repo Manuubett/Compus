@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- Homepage -->
   <url>
     <loc>https://compus.bettke.space/</loc>
     <lastmod>2025-01-01</lastmod>
     <priority>1.00</priority>
   </url>
 
+  <!-- Network Page -->
+  <url>
+    <loc>https://compus.bettke.space/network.html</loc>
+    <lastmod>2025-01-01</lastmod>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Opportunities Page -->
+  <url>
+    <loc>https://compus.bettke.space/Opportunity.html</loc>
+    <lastmod>2025-01-01</lastmod>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Profile Page -->
+  <url>
+    <loc>https://compus.bettke.space/compus%20profile.html</loc>
+    <lastmod>2025-01-01</lastmod>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Login / Join Page -->
   <url>
     <loc>https://compus.bettke.space/login5.html</loc>
     <lastmod>2025-01-01</lastmod>
-    <priority>0.80</priority>
+    <priority>0.60</priority>
   </url>
 
 </urlset>
