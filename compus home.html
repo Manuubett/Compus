@@ -528,7 +528,6 @@
     transform: scale(1.08);
   }
 </style>
-  
 
   <!-- ===== NAVIGATION ===== -->
 <nav id="mainNav" style="background:#4361ee;padding:12px 20px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;position:sticky;top:0;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
@@ -1013,8 +1012,6 @@ function playNotificationSound() {
     }
   });
 </script>
-
-
 <script>
 if(!window.navNotifLoaded){
   window.navNotifLoaded = true;
@@ -1032,9 +1029,9 @@ if(!window.navNotifLoaded){
   let currentUser=null;
   let previousCount=0;
   let previousSentRequests=[];
-  let oppTimestamp = null;  // detect only new opportunities
+  let oppTimestamp = localStorage.getItem("oppTimestamp") || null;  // detect only new opportunities
 
-  document.addEventListener('click',()=>{sound.play().catch(()=>{});sound.pause();sound.currentTime=0;},{once:true});
+// Replace the old unlock line with this completely silent one const unlockSound = () => {   sound.muted = true;   sound.play().then(() => {     sound.pause();     sound.currentTime = 0;     sound.muted = false;   }).catch(() => {});   document.removeEventListener('click', unlockSound); }; document.addEventListener('click', unlockSound);
 
   bell.addEventListener('click', e => {
     e.preventDefault();
@@ -1086,6 +1083,7 @@ if(!window.navNotifLoaded){
         setTimeout(()=>bell.querySelector('i').classList.remove('fa-shake'),800);
       }
       previousCount=total;
+      localStorage.setItem("previousCount", total);
 
       renderDropdownNotifications(received,newlyAccepted,chatSnap);
     });
@@ -1103,7 +1101,7 @@ if(!window.navNotifLoaded){
         // Only trigger for BRAND NEW opportunity
         if(oppTimestamp === data.timestamp) return;
         oppTimestamp = data.timestamp;
-
+localStorage.setItem("oppTimestamp", data.timestamp);
         prependDropdownItem({
           type:'opportunity',
           id:doc.id,

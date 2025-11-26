@@ -136,7 +136,7 @@
 
 <!-- Notification Sound -->
 <audio id="notifSound" preload="auto">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3" type="audio/mpeg">
+  <source src="new-notification-021-370045.mp3" type="audio/mpeg">
 </audio>
 
 <style>
@@ -316,6 +316,7 @@ document.getElementById("filterType").addEventListener("change", renderOpportuni
 
 loadOpportunities();
 </script>
+
 <script>
 if(!window.navNotifLoaded){
   window.navNotifLoaded = true;
@@ -333,9 +334,9 @@ if(!window.navNotifLoaded){
   let currentUser=null;
   let previousCount=0;
   let previousSentRequests=[];
-  let oppTimestamp = null;  // detect only new opportunities
+  let oppTimestamp = localStorage.getItem("oppTimestamp") || null;  // detect only new opportunities
 
-  document.addEventListener('click',()=>{sound.play().catch(()=>{});sound.pause();sound.currentTime=0;},{once:true});
+// Replace the old unlock line with this completely silent one const unlockSound = () => {   sound.muted = true;   sound.play().then(() => {     sound.pause();     sound.currentTime = 0;     sound.muted = false;   }).catch(() => {});   document.removeEventListener('click', unlockSound); }; document.addEventListener('click', unlockSound);
 
   bell.addEventListener('click', e => {
     e.preventDefault();
@@ -387,6 +388,7 @@ if(!window.navNotifLoaded){
         setTimeout(()=>bell.querySelector('i').classList.remove('fa-shake'),800);
       }
       previousCount=total;
+      localStorage.setItem("previousCount", total);
 
       renderDropdownNotifications(received,newlyAccepted,chatSnap);
     });
@@ -404,7 +406,7 @@ if(!window.navNotifLoaded){
         // Only trigger for BRAND NEW opportunity
         if(oppTimestamp === data.timestamp) return;
         oppTimestamp = data.timestamp;
-
+localStorage.setItem("oppTimestamp", data.timestamp);
         prependDropdownItem({
           type:'opportunity',
           id:doc.id,
@@ -559,6 +561,5 @@ if(!window.navNotifLoaded){
   }
 }
 </script>
-
 </body>
 </html>
